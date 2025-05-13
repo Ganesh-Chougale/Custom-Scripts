@@ -1,0 +1,86 @@
+const fs = require('fs');
+const path = require('path');
+
+// Ignored folders (only folder names should be listed here)
+const ignoredFolders = [
+    '.angular', '.vscode', 'node_modules', 'Migrations', 'Debug',
+    'Dependencies', 'Connected Services', '.git' // Adding .git to ignored folders
+];
+
+// Recursive directory walker
+function walkDir(dir, callback) {
+    if (!fs.existsSync(dir)) return;
+    fs.readdirSync(dir).forEach((file) => {
+        const filePath = path.join(dir, file);
+        const stats = fs.statSync(filePath);
+
+        // Skip ignored folders directly in this check
+        const dirName = path.basename(filePath);
+        if (stats.isDirectory() && !ignoredFolders.includes(dirName)) {
+            callback(filePath);  // Process directory
+            walkDir(filePath, callback);  // Recursively walk into subdirectories
+        }
+    });
+}
+
+// Folder structure generator (Tree-like format)
+function generateFolderStructure(root, selectedDirs) {
+    let structure = "";
+    let processedDirs = 0;
+    let totalDirs = 0;
+
+    console.log(`🔍 Starting directory scan...`);
+
+    // Determine target directories to scan
+    const targets = selectedDirs.length > 0
+        ? selectedDirs.map(folder => path.join(root, folder)).filter(fs.existsSync)
+        : [root];
+
+    // First pass to count total directories
+    targets.forEach((dir) => {
+        walkDir(dir, (dirPath) => {
+            const dirName = path.basename(dirPath);
+            if (!ignoredFolders.includes(dirName)) {
+                totalDirs++;
+            }
+        });
+    });
+
+    console.log(`📁 Total directories to process: ${totalDirs}`);
+
+    // Second pass to process directories and build folder structure
+    targets.forEach((dir) => {
+        walkDir(dir, (dirPath) => {
+            const dirName = path.basename(dirPath);
+            if (!ignoredFolders.includes(dirName)) {
+                const relativePath = path.relative(root, dirPath);
+                const indentLevel = relativePath.split(path.sep).length - 1;
+                const indent = '│   '.repeat(indentLevel);  // Indentation for tree structure
+
+                // Adding "├──" for middle nodes and "└──" for last node
+                const isLastNode = !fs.existsSync(path.join(dirPath, '..')) || fs.readdirSync(path.join(dirPath, '..')).pop() === dirName;
+                const prefix = isLastNode ? '└── ' : '├── ';
+                
+                // Format directory structure as a tree
+                console.log(`Processing: ${relativePath}`);
+                structure += `${indent}${prefix}${dirName}/\n`;
+
+                processedDirs++;
+                const progress = Math.round((processedDirs / totalDirs) * 100);
+                process.stdout.write(`\rProgress: ${progress}%`);
+
+                if (processedDirs === totalDirs) {
+                    console.log(`\n💾 Writing to zzzD...`);
+                    fs.writeFileSync(path.join(root, 'zzzD'), structure);
+                    console.log(`✅ Done! Folder structure saved to zzzD`);
+                }
+            }
+        });
+    });
+}
+
+// MAIN
+const rootDir = process.cwd();
+const selectedDirs = process.argv.slice(2);  // Command-line folders
+
+generateFolderStructure(rootDir, selectedDirs);
