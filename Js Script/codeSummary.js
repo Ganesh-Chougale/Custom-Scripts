@@ -1,4 +1,3 @@
-// cS.js = codeSummary.js
 const fs = require('fs');
 const path = require('path');
 
@@ -22,7 +21,7 @@ const supportedExtensions = {
 const ignoredFiles = [
     '.angular', '.vscode', 'node_modules', '.editorconfig', '.gitignore', 'Migrations', 'Debug',
     'angular.json', 'package-lock.json', 'package.json', 'README.md', 'Dependencies', 'Connected Services',
-    'tsconfig.app.json', 'tsconfig.json', 'tsconfig.spec.json', 'cS.js', 'zzzC.md', 'codeSummary.js'
+    'tsconfig.app.json', 'tsconfig.json', 'tsconfig.spec.json', 'cS.js', 'zzz.md'
 ];
 
 let processedFiles = 0;
@@ -45,6 +44,27 @@ function walkDir(dir, callback) {
     });
 }
 
+// Function to remove excessive empty lines
+function removeExcessiveEmptyLines(content) {
+    const lines = content.split('\n');
+    let newContent = '';
+    let emptyLineCount = 0;
+
+    lines.forEach(line => {
+        if (line.trim() === '') {
+            emptyLineCount++;
+            if (emptyLineCount <= 2) {
+                newContent += '\n';
+            }
+        } else {
+            emptyLineCount = 0;
+            newContent += line + '\n';
+        }
+    });
+
+    return newContent.trim(); // Remove any leading/trailing spaces
+}
+
 // Summary generator
 function generateSummary(root, selectedDirs) {
     let summary = "";
@@ -56,7 +76,7 @@ function generateSummary(root, selectedDirs) {
 
     // Determine target directories to scan
     const targets = selectedDirs.length > 0
-        ? selectedDirs.map(folder => path.join(root, folder)).filter(fs.existsSync)
+        ? selectedDirs.map(folder => path.resolve(folder)).filter(fs.existsSync)
         : [root];
 
     // First pass to count total files
@@ -64,8 +84,9 @@ function generateSummary(root, selectedDirs) {
         walkDir(dir, (filePath) => {
             const ext = path.extname(filePath);
             const lang = supportedExtensions[ext];
+            const relativeFilePath = path.relative(root, filePath);
 
-            if (!lang || ignoredFiles.some((ignored) => filePath.includes(ignored))) {
+            if (!lang || ignoredFiles.some((ignored) => relativeFilePath.includes(ignored))) {
                 return;
             }
 
@@ -80,14 +101,14 @@ function generateSummary(root, selectedDirs) {
         walkDir(dir, (filePath) => {
             const ext = path.extname(filePath);
             const lang = supportedExtensions[ext];
+            const relativeFilePath = path.relative(root, filePath);
 
-            if (!lang || ignoredFiles.some((ignored) => filePath.includes(ignored))) {
+            if (!lang || ignoredFiles.some((ignored) => relativeFilePath.includes(ignored))) {
                 return;
             }
 
-            const relativePath = path.relative(root, filePath);
             const content = fs.readFileSync(filePath, 'utf-8');
-            currentDir = path.dirname(relativePath).split(path.sep)[0];
+            currentDir = path.dirname(relativeFilePath).split(path.sep)[0];
 
             if (currentDir !== lastDir) {
                 if (lastDir) {
@@ -96,17 +117,21 @@ function generateSummary(root, selectedDirs) {
                 lastDir = currentDir;
             }
 
-            console.log(`Processing: ${relativePath}`);
-            summary += `${relativePath}:\n\`\`\`${lang}\n${content}\n\`\`\`\n\n`;
+            console.log(`Processing: ${relativeFilePath}`);
+
+            // Remove excessive empty lines from content
+            const cleanedContent = removeExcessiveEmptyLines(content);
+
+            summary += `${relativeFilePath}:\n\`\`\`${lang}\n${cleanedContent}\n\`\`\`\n\n`;
 
             processedFiles++;
             const progress = Math.round((processedFiles / totalFiles) * 100);
             process.stdout.write(`\rProgress: ${progress}%`);
 
             if (processedFiles === totalFiles) {
-                console.log(`\n💾 Writing to zzzC.md...`);
-                fs.writeFileSync(path.join(root, 'zzzC.md'), summary);
-                console.log(`✅ Done! Summary saved to zzzC.md`);
+                console.log(`\n💾 Writing to zzz.md...`);
+                fs.writeFileSync(path.join(__dirname, 'zzz.md'), summary); // Save in script's folder
+                console.log(`✅ Done! Summary saved to zzz.md`);
             }
         });
     });
@@ -114,10 +139,9 @@ function generateSummary(root, selectedDirs) {
 
 // MAIN
 const rootDir = process.cwd();
-const selectedDirs = process.argv.slice(2);  // Command-line folders
+const selectedDirs = process.argv.slice(2);  // Accepts absolute or relative paths
 
 generateSummary(rootDir, selectedDirs);
 
-
-// node cd.js: for all codebase
-// node cS.js src/app/modules/dashboard: for specific folder 
+// relative path: node .\cs.js .\src\app
+// absolute path (pass path as string): node .\cs.js "C:\Users\RaSkull\Desktop\Code"
