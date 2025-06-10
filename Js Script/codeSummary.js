@@ -19,9 +19,9 @@ const supportedExtensions = {
 
 // Ignored files and folders
 const ignoredFiles = [
-    '.angular', '.vscode', 'node_modules', '.editorconfig', '.gitignore', 'Migrations', 'Debug',
+    '.angular', '.vscode', 'node_modules', '.editorconfig', '.gitignore', 'Migrations', 'Debug', 'test',
     'angular.json', 'package-lock.json', 'package.json', 'README.md', 'Dependencies', 'Connected Services',
-    'tsconfig.app.json', 'tsconfig.json', 'tsconfig.spec.json', 'cS.js', 'zzz.md'
+    'tsconfig.app.json', 'tsconfig.json', 'tsconfig.spec.json', 'cS.js', 'zzz.md', '.mvn', '.settings'
 ];
 
 let processedFiles = 0;
@@ -35,7 +35,6 @@ function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach((file) => {
         const filePath = path.join(dir, file);
         const stats = fs.statSync(filePath);
-
         if (stats.isDirectory()) {
             walkDir(filePath, callback);
         } else {
@@ -44,7 +43,7 @@ function walkDir(dir, callback) {
     });
 }
 
-// Function to remove excessive empty lines
+// Remove excessive empty lines
 function removeExcessiveEmptyLines(content) {
     const lines = content.split('\n');
     let newContent = '';
@@ -62,8 +61,68 @@ function removeExcessiveEmptyLines(content) {
         }
     });
 
-    return newContent.trim(); // Remove any leading/trailing spaces
+    return newContent.trim();
 }
+
+// Strip comments from code based on language
+function stripComments(content, lang) {
+    switch (lang) {
+        case 'js':
+        case 'ts':
+        case 'java':
+        case 'c':
+        case 'cpp':
+        case 'csharp':
+        case 'php':
+        case 'swift':
+        case 'scala':
+        case 'kotlin':
+            return content
+                .replace(/\/\/.*$/gm, '')                   // single-line //
+                .replace(/\/\*[\s\S]*?\*\//gm, '');         // multi-line /* */
+        
+        case 'python':
+        case 'ruby':
+        case 'bash':
+        case 'shell':
+        case 'dockerfile':
+            return content.replace(/#.*$/gm, '');           // single-line #
+
+        case 'html':
+        case 'xml':
+        case 'vue':
+        case 'svelte':
+            return content.replace(/<!--[\s\S]*?-->/gm, ''); // <!-- comment -->
+
+        case 'css':
+        case 'scss':
+        case 'less':
+            return content.replace(/\/\*[\s\S]*?\*\//gm, ''); // /* comment */
+
+        case 'yaml':
+        case 'yml':
+        case 'ini':
+        case 'toml':
+            return content.replace(/^\s*#.*/gm, '');         // # comment
+
+        case 'sql':
+            return content
+                .replace(/--.*$/gm, '')                      // -- comment
+                .replace(/\/\*[\s\S]*?\*\//gm, '');           // /* comment */
+
+        case 'json':
+            return content; // No official comment syntax
+
+        case 'markdown':
+        case 'md':
+        case 'txt':
+            return content; // Usually no code comments
+
+        default:
+            return content; // Safe fallback
+    }
+}
+
 
 // Summary generator
 function generateSummary(root, selectedDirs) {
@@ -74,38 +133,30 @@ function generateSummary(root, selectedDirs) {
 
     console.log(`🔍 Starting scan...`);
 
-    // Determine target directories to scan
     const targets = selectedDirs.length > 0
         ? selectedDirs.map(folder => path.resolve(folder)).filter(fs.existsSync)
         : [root];
 
-    // First pass to count total files
+    // First pass: count valid files
     targets.forEach((dir) => {
         walkDir(dir, (filePath) => {
             const ext = path.extname(filePath);
             const lang = supportedExtensions[ext];
             const relativeFilePath = path.relative(root, filePath);
-
-            if (!lang || ignoredFiles.some((ignored) => relativeFilePath.includes(ignored))) {
-                return;
-            }
-
+            if (!lang || ignoredFiles.some((ignored) => relativeFilePath.includes(ignored))) return;
             totalFiles++;
         });
     });
 
     console.log(`📄 Total files to process: ${totalFiles}`);
 
-    // Second pass to process files
+    // Second pass: process each file
     targets.forEach((dir) => {
         walkDir(dir, (filePath) => {
             const ext = path.extname(filePath);
             const lang = supportedExtensions[ext];
             const relativeFilePath = path.relative(root, filePath);
-
-            if (!lang || ignoredFiles.some((ignored) => relativeFilePath.includes(ignored))) {
-                return;
-            }
+            if (!lang || ignoredFiles.some((ignored) => relativeFilePath.includes(ignored))) return;
 
             const content = fs.readFileSync(filePath, 'utf-8');
             currentDir = path.dirname(relativeFilePath).split(path.sep)[0];
@@ -119,8 +170,9 @@ function generateSummary(root, selectedDirs) {
 
             console.log(`Processing: ${relativeFilePath}`);
 
-            // Remove excessive empty lines from content
-            const cleanedContent = removeExcessiveEmptyLines(content);
+            // Strip comments then clean blank lines
+            let cleanedContent = stripComments(content, lang);
+            cleanedContent = removeExcessiveEmptyLines(cleanedContent);
 
             summary += `${relativeFilePath}:\n\`\`\`${lang}\n${cleanedContent}\n\`\`\`\n\n`;
 
@@ -130,7 +182,7 @@ function generateSummary(root, selectedDirs) {
 
             if (processedFiles === totalFiles) {
                 console.log(`\n💾 Writing to zzz.md...`);
-                fs.writeFileSync(path.join(__dirname, 'zzz.md'), summary); // Save in script's folder
+                fs.writeFileSync(path.join(__dirname, 'zzz.md'), summary);
                 console.log(`✅ Done! Summary saved to zzz.md`);
             }
         });
@@ -139,8 +191,7 @@ function generateSummary(root, selectedDirs) {
 
 // MAIN
 const rootDir = process.cwd();
-const selectedDirs = process.argv.slice(2);  // Accepts absolute or relative paths
-
+const selectedDirs = process.argv.slice(2);
 generateSummary(rootDir, selectedDirs);
 
 // relative path: node .\cs.js .\src\app
