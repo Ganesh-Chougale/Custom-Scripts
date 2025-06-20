@@ -4,7 +4,7 @@ const path = require('path');
 async function splitMarkdownFile(filePath, maxLinesPerPart = 700) {
     try {
         // Resolve the absolute path to ensure correctness
-        const absoluteFilePath = path.resolve(filePath);
+        const absoluteFilePath = path.resolve(__dirname, filePath);
         console.log(`Attempting to split file: ${absoluteFilePath}`);
 
         const fileContent = await fs.promises.readFile(absoluteFilePath, 'utf8');
