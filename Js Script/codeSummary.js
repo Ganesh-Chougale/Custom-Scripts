@@ -14,7 +14,10 @@ const supportedExtensions = {
     '.c': 'c',
     '.php': 'php',
     '.sh': 'bash',
-    '.cs': 'csharp'
+    '.cs': 'csharp',
+    '.css': 'css',
+    '.txt': 'text',
+    '.h': 'cpp header' 
 };
 
 // Ignored files and folders
