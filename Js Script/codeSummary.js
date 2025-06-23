@@ -22,9 +22,9 @@ const supportedExtensions = {
 
 // Ignored files and folders
 const ignoredFiles = [
-    '.angular', '.vscode', 'node_modules', '.editorconfig', '.gitignore', 'Migrations', 'Debug', 'test',
+    '.angular', '.vscode', 'node_modules', '.editorconfig', '.gitignore', 'Migrations', 'Debug', 'test', 'libs',
     'angular.json', 'package-lock.json', 'package.json', 'README.md', 'Dependencies', 'Connected Services',
-    'tsconfig.app.json', 'tsconfig.json', 'tsconfig.spec.json', 'cS.js', 'zzz.md', '.mvn', '.settings'
+    'tsconfig.app.json', 'tsconfig.json', 'tsconfig.spec.json', 'cS.js', 'zzz.md', '.mvn', '.settings', 'build'
 ];
 
 let processedFiles = 0;
@@ -176,18 +176,10 @@ function generateSummary(root, selectedDirs) {
 
             console.log(`Processing: ${relativeFilePath}`);
 
-            // DEBUG FOR .h
-            if (ext === '.h') {
-                console.log('\n===== BEFORE CLEANING (.h) =====\n', content);
-            }
 
             // Strip comments then clean blank lines
             let cleanedContent = stripComments(content, lang);
             cleanedContent = removeExcessiveEmptyLines(cleanedContent);
-
-            if (ext === '.h') {
-                console.log('\n===== AFTER CLEANING (.h) =====\n', cleanedContent);
-            }
 
             summary += `${relativeFilePath}:\n\`\`\`${lang}\n${cleanedContent}\n\`\`\`\n\n`;
 
