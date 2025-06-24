@@ -1,28 +1,32 @@
 const fs = require('fs');
 const path = require('path');
 
-// Ignored folders (only folder names should be listed here)
+const depthLevel = 2; // 👈 control how deep to go
+
+const justAMessage = {
+    Change_Depth_Level_Message: "change value of depthLevel to 'Infinity' for max penetration"
+}
+
 const ignoredFolders = [
     '.angular', '.vscode', 'node_modules', 'Migrations', 'Debug',
     'Dependencies', 'Connected Services', '.git'
 ];
 
-// Recursive directory walker
-function walkDir(dir, callback) {
-    if (!fs.existsSync(dir)) return;
+function walkDir(dir, callback, depth = 0, maxDepth = depthLevel) {
+    if (!fs.existsSync(dir) || depth >= maxDepth) return;
+
     fs.readdirSync(dir).forEach((file) => {
         const filePath = path.join(dir, file);
         const stats = fs.statSync(filePath);
-
         const dirName = path.basename(filePath);
+
         if (stats.isDirectory() && !ignoredFolders.includes(dirName)) {
-            callback(filePath);
-            walkDir(filePath, callback);
+            callback(filePath, depth + 1);
+            walkDir(filePath, callback, depth + 1, maxDepth);
         }
     });
 }
 
-// Folder structure generator (Tree-like format)
 function generateFolderStructure(root, selectedDirs) {
     let structure = "";
     let processedDirs = 0;
@@ -30,7 +34,6 @@ function generateFolderStructure(root, selectedDirs) {
 
     console.log(`🔍 Starting directory scan...`);
 
-    // Normalize selectedDirs: support both absolute and relative paths
     const targets = selectedDirs.length > 0
         ? selectedDirs.map(folder =>
             path.isAbsolute(folder) ? folder : path.join(root, folder)
@@ -44,18 +47,18 @@ function generateFolderStructure(root, selectedDirs) {
             if (!ignoredFolders.includes(dirName)) {
                 totalDirs++;
             }
-        });
+        }, 0, depthLevel);
     });
 
     console.log(`📁 Total directories to process: ${totalDirs}`);
 
-    // Second pass: process and build structure
+    // Second pass: generate structure
     targets.forEach((dir) => {
-        walkDir(dir, (dirPath) => {
+        walkDir(dir, (dirPath, depth) => {
             const dirName = path.basename(dirPath);
             if (!ignoredFolders.includes(dirName)) {
                 const relativePath = path.relative(root, dirPath);
-                const indentLevel = relativePath.split(path.sep).length - 1;
+                const indentLevel = depth - 1;
                 const indent = '│   '.repeat(indentLevel);
 
                 const parent = path.dirname(dirPath);
@@ -75,12 +78,12 @@ function generateFolderStructure(root, selectedDirs) {
                 process.stdout.write(`\rProgress: ${progress}%`);
 
                 if (processedDirs === totalDirs) {
-                    console.log(`\n💾 Writing to zzzD...`);
+                    console.log(`\n💾 Writing to zzz.md...`);
                     fs.writeFileSync(path.join(root, 'zzz.md'), '```\n' + structure + '```');
-                    console.log(`✅ Done! Folder structure saved to zzzD`);
+                    console.log(`✅ Done! Folder structure saved to zzz.md`);
                 }
             }
-        });
+        }, 0, depthLevel);
     });
 }
 
