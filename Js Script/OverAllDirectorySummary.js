@@ -76,7 +76,7 @@ function generateFolderStructure(root, selectedDirs) {
 
                 if (processedDirs === totalDirs) {
                     console.log(`\n💾 Writing to zzzD...`);
-                    fs.writeFileSync(path.join(root, 'zzz.md'), structure);
+                    fs.writeFileSync(path.join(root, 'zzz.md'), '```\n' + structure + '```');
                     console.log(`✅ Done! Folder structure saved to zzzD`);
                 }
             }
