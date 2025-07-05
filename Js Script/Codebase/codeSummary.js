@@ -23,8 +23,9 @@ const supportedExtensions = {
 // Ignored files and folders
 const ignoredFiles = [
     '.angular', '.vscode', 'node_modules', '.editorconfig', '.gitignore', 'Migrations', 'Debug', 'test', 'libs',
-    'angular.json', 'package-lock.json', 'package.json', 'README.md', 'Dependencies', 'Connected Services',
-    'tsconfig.app.json', 'tsconfig.json', 'tsconfig.spec.json', 'cS.js', 'zzz.md', '.mvn', '.settings', 'build'
+    'angular.json', 'package-lock.json', 'package.json', 'README.md', 'Dependencies', 'Connected Services', 
+    'tsconfig.app.json', 'tsconfig.json', 'tsconfig.spec.json',  'cs.md', '.mvn', '.settings', 'build', 
+    'codeSummary.js', 'CodeSummary.js', 'cS.js', 'CS.js'
 ];
 
 let processedFiles = 0;
@@ -188,9 +189,9 @@ function generateSummary(root, selectedDirs) {
             process.stdout.write(`\rProgress: ${progress}%`);
 
             if (processedFiles === totalFiles) {
-                console.log(`\n💾 Writing to zzz.md...`);
-                fs.writeFileSync(path.join(__dirname, 'zzz.md'), summary);
-                console.log(`✅ Done! Summary saved to zzz.md`);
+                console.log(`\n💾 Writing to cs.md...`);
+                fs.writeFileSync(path.join(__dirname, 'cs.md'), summary);
+                console.log(`✅ Done! Summary saved to cs.md`);
             }
         });
     });
