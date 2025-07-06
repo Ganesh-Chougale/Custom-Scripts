@@ -17,7 +17,8 @@ const supportedExtensions = {
     '.cs': 'csharp',
     '.css': 'css',
     '.txt': 'text',
-    '.h': 'cpp' // treating .h files as cpp
+    '.h': 'cpp',
+    '.hpp': 'cpp'
 };
 
 // Ignored files and folders
