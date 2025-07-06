@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-async function splitMarkdownFile(filePath, maxLinesPerPart = 700) {
+let Amount = 700;
+
+async function splitMarkdownFile(filePath, maxLinesPerPart = Amount) {
     try {
         const absoluteFilePath = path.resolve(__dirname, filePath);
         console.log(`Attempting to split file: ${absoluteFilePath}`);
