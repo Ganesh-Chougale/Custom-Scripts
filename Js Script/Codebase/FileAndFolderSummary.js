@@ -41,15 +41,12 @@ function generateStructure(root, selectedDirs) {
         }, 0, depthLevel);
     });
 
-    // Sort entries by path to get consistent sibling ordering
     entries.sort((a, b) => a.path.localeCompare(b.path));
 
     let lastAtDepth = {};
 
-    entries.forEach((entry, idx) => {
+    entries.forEach((entry) => {
         const { depth, name, isDir } = entry;
-
-        // find siblings at the same depth
         const siblings = entries.filter(e => e.depth === depth && path.dirname(e.path) === path.dirname(entry.path));
         const isLast = siblings[siblings.length - 1].name === name;
 
@@ -59,12 +56,18 @@ function generateStructure(root, selectedDirs) {
             prefix += lastAtDepth[i] ? '    ' : '│   ';
         }
         prefix += isLast ? '└── ' : '├── ';
-
         structure += `${prefix}${name}${isDir ? '/' : ''}\n`;
     });
 
-    fs.writeFileSync(path.join(root, 'FDS.md'), '```\n' + structure + '```');
-    console.log(`✅ Folder + File structure saved to FDS.md`);
+    // New output path: Script's dir + ScriptOutput/FolderStructure
+    const scriptDir = path.dirname(__filename);
+    const outputDir = path.join(scriptDir, 'ScriptOutput', 'FolderStructure');
+    fs.mkdirSync(outputDir, { recursive: true });
+
+    const outputPath = path.join(outputDir, 'FileAndFolderSummary.md');
+    fs.writeFileSync(outputPath, '```\n' + structure + '```');
+
+    console.log(`✅ Folder + File structure saved to: ${outputPath}`);
 }
 
 // MAIN
