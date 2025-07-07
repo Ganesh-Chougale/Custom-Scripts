@@ -49,6 +49,10 @@ const ignoredFiles = [
   "CodeSummary.js",
   "cS.js",
   "CS.js",
+  "DirectorySummary.js",
+  "ErrorExporter.js",
+  "FileAndFolderSummary.js",
+  "Splitter.js",
 ];
 
 let processedFiles = 0;
