@@ -27,11 +27,7 @@ const supportedExtensions = {
 3. Ignored file & folder  
 ```javascript
 const ignoredFiles = [
-  ".angular", ".vscode", "node_modules", ".editorconfig", ".gitignore", "Migrations", "Debug",
-  "test", "libs", "angular.json", "package-lock.json", "package.json", "README.md", "Dependencies",
-  "Connected Services", "tsconfig.app.json", "tsconfig.json", "tsconfig.spec.json", "CodeSummary.md",
-  ".mvn", ".settings", "build", "codeSummary.js", "CodeSummary.js", "cS.js", "CS.js", "DirectorySummary.js",
-  "ErrorExporter.js", "FileAndFolderSummary.js", "Splitter.js",
+  ".metadata", "libraries", "gradle",  ".angular", ".vscode", "node_modules", ".editorconfig", ".gitignore", "Migrations", "Debug",  "test", "libs", "angular.json", "package-lock.json", "package.json", "README.md", "Dependencies",  "Connected Services", "tsconfig.app.json", "tsconfig.json", "tsconfig.spec.json", "CodeSummary.md", ".mvn", ".settings", "build", "codeSummary.js", "CodeSummary.js", "cS.js", "CS.js", ".idea", "DirectorySummary.js", "ErrorExporter.js", "FileAndFolderSummary.js", "Splitter.js", ".dart_tool",
 ];
 ```  
 4. Adding CLI switches to turn features on/off or regulate/limit   
