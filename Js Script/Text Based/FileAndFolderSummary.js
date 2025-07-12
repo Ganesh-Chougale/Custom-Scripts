@@ -61,7 +61,7 @@ function generateStructure(root, selectedDirs) {
 
     // New output path: Script's dir + ScriptOutput/FolderStructure
     const scriptDir = path.dirname(__filename);
-    const outputDir = path.join(scriptDir, 'ScriptOutput', 'FolderStructure');
+    const outputDir = path.join(scriptDir, 'ScriptOutput');
     fs.mkdirSync(outputDir, { recursive: true });
 
     const outputPath = path.join(outputDir, 'FileAndFolderSummary.md');

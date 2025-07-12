@@ -201,7 +201,7 @@ function generateSummary(root, selectedDirs) {
 
       if (processedFiles === totalFiles) {
         console.log(`\n💾 Writing to CodeSummary.md...`);
-        const outputDir = path.join(__dirname, "ScriptOutput", "CodeSummary");
+        const outputDir = path.join(__dirname, "ScriptOutput");
         fs.mkdirSync(outputDir, { recursive: true });
         fs.writeFileSync(path.join(outputDir, "CodeSummary.md"), summary);
         console.log(`✅ Done! Summary saved to CodeSummary.md`);
