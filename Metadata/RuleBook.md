@@ -19,15 +19,34 @@ node script.js "\file.extension"
 2. Extension supports:  
 ```javascript
 const supportedExtensions = {
-  ".js": "js", ".html": "html", ".ts": "typescript", ".java": "java", ".py": "python",
-  ".go": "go", ".rb": "ruby", ".cpp": "cpp", ".c": "c", ".php": "php", ".sh": "bash",
-  ".cs": "csharp", ".css": "css", ".txt": "text", ".h": "cpp", ".hpp": "cpp", ".md": "markdown",
+  ".js": "js",
+  ".html": "html",
+  ".ts": "typescript",
+  ".java": "java",
+  ".py": "python",
+  ".go": "go",
+  ".rb": "ruby",
+  ".cpp": "cpp",
+  ".c": "c",
+  ".php": "php",
+  ".sh": "bash",
+  ".cs": "csharp",
+  ".css": "css",
+  // ".txt": "text",
+  ".h": "cpp",
+  ".hpp": "cpp",
+  ".yaml": "yaml"
 };
 ```  
 3. Ignored file & folder  
 ```javascript
 const ignoredFiles = [
-  ".metadata", "libraries", "gradle",  ".angular", ".vscode", "node_modules", ".editorconfig", ".gitignore", "Migrations", "Debug",  "test", "libs", "angular.json", "package-lock.json", "package.json", "README.md", "Dependencies",  "Connected Services", "tsconfig.app.json", "tsconfig.json", "tsconfig.spec.json", "CodeSummary.md", ".mvn", ".settings", "build", "codeSummary.js", "CodeSummary.js", "cS.js", "CS.js", ".idea", "DirectorySummary.js", "ErrorExporter.js", "FileAndFolderSummary.js", "Splitter.js", ".dart_tool",
+   ".metadata", "libraries", "gradle",  ".angular", ".vscode", "node_modules", ".editorconfig", 
+   ".gitignore", "Migrations", "Debug",  "test", "libs", "angular.json", "package-lock.json", 
+   "package.json", "README.md", "Dependencies",  "Connected Services", "tsconfig.app.json", 
+   "tsconfig.json", "tsconfig.spec.json", "CodeSummary.md", ".mvn", ".settings", "build", 
+   "codeSummary.js", "CodeSummary.js", "cS.js", "CS.js", ".idea", "DirectorySummary.js", 
+   "ErrorExporter.js", "FileAndFolderSummary.js", "Splitter.js", ".dart_tool", "io", "plugins", "flutter", "windows"
 ];
 ```  
 4. Adding CLI switches to turn features on/off or regulate/limit   
