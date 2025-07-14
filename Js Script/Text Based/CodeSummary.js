@@ -21,8 +21,8 @@ const supportedExtensions = {
   ".css": "css",
   // ".txt": "text",
   ".h": "cpp",
-  ".hpp": "cpp",
-  ".yaml": "yaml"
+  ".yaml": "yaml",
+  ".dart": "dart"
 };
 
 // Ignored files and folders

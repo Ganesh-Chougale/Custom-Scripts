@@ -59,7 +59,7 @@ if (process.argv.includes('--info')) {
 // -------------------- MAIN LOGIC -------------------- //
 
 // Default max lines
-let maxLines = 700;
+let maxLines = 1000;
 
 // CLI flags
 const inputPath = process.argv[2];
@@ -81,7 +81,7 @@ const supportedExtensions = {
 };
 
 const ignoredFiles = [
-    ".metadata", "libraries", "gradle",  ".angular", ".vscode", "node_modules", ".editorconfig", ".gitignore", "Migrations", "Debug",  "test", "libs", "angular.json", "package-lock.json", "package.json", "README.md", "Dependencies",  "Connected Services", "tsconfig.app.json", "tsconfig.json", "tsconfig.spec.json", "CodeSummary.md", ".mvn", ".settings", "build", "codeSummary.js", "CodeSummary.js", "cS.js", "CS.js", ".idea", "DirectorySummary.js", "ErrorExporter.js", "FileAndFolderSummary.js", "Splitter.js", ".dart_tool",
+    ".metadata", "libraries", "gradle",  ".angular", ".vscode", "node_modules", ".editorconfig", ".gitignore", "Migrations", "Debug",  "test", "libs", "angular.json", "package-lock.json", "package.json", "README.md", "Dependencies",  "Connected Services", "tsconfig.app.json", "tsconfig.json", "tsconfig.spec.json", ".mvn", ".settings", "build", "codeSummary.js", "CodeSummary.js", "cS.js", "CS.js", ".idea", "DirectorySummary.js", "ErrorExporter.js", "FileAndFolderSummary.js", "Splitter.js", ".dart_tool",
 ];
 
 if (!inputPath) {

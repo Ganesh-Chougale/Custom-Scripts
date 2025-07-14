@@ -35,7 +35,8 @@ const supportedExtensions = {
   // ".txt": "text",
   ".h": "cpp",
   ".hpp": "cpp",
-  ".yaml": "yaml"
+  ".yaml": "yaml",
+  ".dart": "dart"
 };
 ```  
 3. Ignored file & folder  
