@@ -22,11 +22,15 @@ const supportedExtensions = {
   // ".txt": "text",
   ".h": "cpp",
   ".yaml": "yaml",
-  ".dart": "dart"
+  ".dart": "dart",
+  ".tsx": "typescript",
+  ".mjs": "javascript",
+  ".env": "env"
 };
 
 // Ignored files and folders
 const ignoredFiles = [
+  "site",
    ".metadata", "libraries", "gradle",  ".angular", ".vscode", "node_modules", ".editorconfig", 
    ".gitignore", "Migrations", "Debug",  "test", "libs", "angular.json", "package-lock.json", 
    "package.json", "README.md", "Dependencies",  "Connected Services", "tsconfig.app.json", "next-env.d.ts",
