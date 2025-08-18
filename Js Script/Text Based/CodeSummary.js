@@ -4,6 +4,9 @@ const path = require("path");
 // Toggle this to control formatting whitespace/tabs
 const removeWhitespaceFormatting = true;
 
+// List of languages/extensions to skip
+const skipLanguages = [".css", "text"]; // can be ".css" or "css" or mixed
+
 // Supported file extensions and languages
 const supportedExtensions = {
   ".js": "js",
@@ -19,7 +22,7 @@ const supportedExtensions = {
   ".sh": "bash",
   ".cs": "csharp",
   ".css": "css",
-  // ".txt": "text",
+  ".txt": "text",
   ".h": "cpp",
   ".yaml": "yaml",
   ".dart": "dart",
@@ -27,6 +30,14 @@ const supportedExtensions = {
   ".mjs": "javascript",
   ".env": "env"
 };
+
+// 🔑 Normalize skipLanguages so it can take both extensions (.css) or language names (css)
+const normalizedSkipLanguages = skipLanguages.map((item) => {
+  if (item.startsWith(".")) {
+    return supportedExtensions[item] || item.replace(".", "");
+  }
+  return item;
+});
 
 // Ignored files and folders
 const ignoredFiles = [
@@ -96,7 +107,7 @@ function stripComments(content, lang) {
     case "json":
     case "markdown":
     case "md":
-    case "txt":
+    case "text":
       return content;
     default:
       return content;
@@ -138,7 +149,8 @@ function generateSummary(root, selectedDirs) {
       const relativeFilePath = path.relative(root, filePath);
       if (
         !lang ||
-        ignoredFiles.some((ignored) => relativeFilePath.includes(ignored))
+        ignoredFiles.some((ignored) => relativeFilePath.includes(ignored)) ||
+        normalizedSkipLanguages.includes(lang)
       )
         return;
       totalFiles++;
@@ -155,7 +167,8 @@ function generateSummary(root, selectedDirs) {
       const relativeFilePath = path.relative(root, filePath);
       if (
         !lang ||
-        ignoredFiles.some((ignored) => relativeFilePath.includes(ignored))
+        ignoredFiles.some((ignored) => relativeFilePath.includes(ignored)) ||
+        normalizedSkipLanguages.includes(lang)
       )
         return;
 
