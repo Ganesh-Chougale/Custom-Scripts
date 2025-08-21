@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const depthLevel = 6; // 👈 change to 'Infinity' if you want full depth
+const depthLevel = 3; // 👈 change to 'Infinity' if you want full depth
 
 const ignoredFolders = [
     '.angular', '.vscode', 'node_modules', 'Migrations', 'Debug',
@@ -36,7 +36,6 @@ function generateStructure(root, selectedDirs) {
         walkDir(dir, (entryPath, depth, isDir) => {
             const name = path.basename(entryPath);
             const relativePath = path.relative(root, entryPath);
-            const indent = '│   '.repeat(depth);
             entries.push({ path: relativePath, depth, name, isDir });
         }, 0, depthLevel);
     });
@@ -44,6 +43,10 @@ function generateStructure(root, selectedDirs) {
     entries.sort((a, b) => a.path.localeCompare(b.path));
 
     let lastAtDepth = {};
+
+    // ✅ Add root folder name at top
+    const rootName = path.basename(root);
+    structure += rootName + '\n';
 
     entries.forEach((entry) => {
         const { depth, name, isDir } = entry;
@@ -71,7 +74,15 @@ function generateStructure(root, selectedDirs) {
 }
 
 // MAIN
-const rootDir = process.cwd();
-const selectedDirs = process.argv.slice(2);
+let rootDir;
+const args = process.argv.slice(2);
 
-generateStructure(rootDir, selectedDirs);
+if (args.length > 0) {
+    // If user passed a folder, make it the root
+    rootDir = path.resolve(args[0]);
+    args.shift(); // Remaining args treated as subdirs
+} else {
+    rootDir = process.cwd();
+}
+
+generateStructure(rootDir, args);

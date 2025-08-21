@@ -5,7 +5,7 @@ const path = require("path");
 const removeWhitespaceFormatting = true;
 
 // List of languages/extensions to skip
-const skipLanguages = [".css", "text"]; // can be ".css" or "css" or mixed
+const skipLanguages = ["text"]; // can be ".css" or "css" or mixed
 
 // Supported file extensions and languages
 const supportedExtensions = {
@@ -42,12 +42,12 @@ const normalizedSkipLanguages = skipLanguages.map((item) => {
 // Ignored files and folders
 const ignoredFiles = [
   "site",
-   ".metadata", "libraries", "gradle",  ".angular", ".vscode", "node_modules", ".editorconfig", 
-   ".gitignore", "Migrations", "Debug",  "test", "libs", "angular.json", "package-lock.json", 
-   "package.json", "README.md", "Dependencies",  "Connected Services", "tsconfig.app.json", "next-env.d.ts",
-   "tsconfig.json", "tsconfig.spec.json", "CodeSummary.md", ".mvn", ".settings", "build", "next.config.ts",
-   "codeSummary.js", "CodeSummary.js", "cS.js", "CS.js", ".idea", "DirectorySummary.js", ".next",
-   "ErrorExporter.js", "FileAndFolderSummary.js", "Splitter.js", ".dart_tool", "io", "plugins", "flutter", "windows"
+  ".metadata", "libraries", "gradle", ".angular", ".vscode", "node_modules", ".editorconfig",
+  ".gitignore", "Migrations", "Debug", "test", "libs", "angular.json", "package-lock.json",
+  "package.json", "README.md", "Dependencies", "Connected Services", "tsconfig.app.json", "next-env.d.ts",
+  "tsconfig.json", "tsconfig.spec.json", "CodeSummary.md", ".mvn", ".settings", "build", "next.config.ts",
+  "codeSummary.js", "CodeSummary.js", "cS.js", "CS.js", ".idea", "DirectorySummary.js", ".next",
+  "ErrorExporter.js", "FileAndFolderSummary.js", "Splitter.js", ".dart_tool", "io", "plugins", "flutter", "windows"
 ];
 
 let processedFiles = 0;
@@ -121,7 +121,7 @@ function removeExcessiveEmptyLines(content) {
     .split("\n")
     .filter((line) => line.trim() !== "")
     .map((line) =>
-      removeWhitespaceFormatting ? line.replace(/\s+/g, "") : line
+      removeWhitespaceFormatting ? line.trimStart() : line
     )
     .join("\n")
     .trim();
