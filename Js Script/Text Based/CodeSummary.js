@@ -1,11 +1,13 @@
 const fs = require("fs");
 const path = require("path");
 
-// Toggle this to control formatting whitespace/tabs
-const removeWhitespaceFormatting = true;
-
-// List of languages/extensions to skip
-const skipLanguages = ["text"]; // can be ".css" or "css" or mixed
+// ⚙️ Config object for switches
+const config = {
+  reduceTokensByWhiteSpace: false,
+  checkOldOutput: true,    // 🔥 Compare with old summary
+  useFixedSnippets: true,  // 🔥 Use fixed.md as fallback
+  skipLanguages: ["text"], // can be ".css" or "css" or mixed
+};
 
 // Supported file extensions and languages
 const supportedExtensions = {
@@ -32,7 +34,7 @@ const supportedExtensions = {
 };
 
 // 🔑 Normalize skipLanguages so it can take both extensions (.css) or language names (css)
-const normalizedSkipLanguages = skipLanguages.map((item) => {
+const normalizedSkipLanguages = config.skipLanguages.map((item) => {
   if (item.startsWith(".")) {
     return supportedExtensions[item] || item.replace(".", "");
   }
@@ -121,10 +123,23 @@ function removeExcessiveEmptyLines(content) {
     .split("\n")
     .filter((line) => line.trim() !== "")
     .map((line) =>
-      removeWhitespaceFormatting ? line.trimStart() : line
+      config.reduceTokensByWhiteSpace ? line.trimStart() : line
     )
     .join("\n")
     .trim();
+}
+
+// 🔎 Parse CodeSummary.md or fixed.md into { filePath: snippet }
+function parseSummary(summaryText) {
+  const snippetRegex = /([^\n]+):\n```(\w+)\n([\s\S]*?)```/g;
+  const snippets = {};
+  let match;
+  while ((match = snippetRegex.exec(summaryText)) !== null) {
+    const filePath = match[1].trim();
+    const code = match[3].trim();
+    snippets[filePath] = code;
+  }
+  return snippets;
 }
 
 // 📝 Generate summary
@@ -159,7 +174,9 @@ function generateSummary(root, selectedDirs) {
 
   console.log(`📄 Total files to process: ${totalFiles}`);
 
-  // Process files
+  // Collect snippets
+  const newSnippets = {};
+
   targets.forEach((dir) => {
     walkDir(dir, (filePath) => {
       const ext = path.extname(filePath).toLowerCase();
@@ -187,21 +204,78 @@ function generateSummary(root, selectedDirs) {
       let cleanedContent = stripComments(content, lang);
       cleanedContent = removeExcessiveEmptyLines(cleanedContent);
 
+      newSnippets[relativeFilePath] = cleanedContent;
+
       summary += `${relativeFilePath}:\n\`\`\`${lang}\n${cleanedContent}\n\`\`\`\n\n`;
 
       processedFiles++;
       const progress = Math.round((processedFiles / totalFiles) * 100);
       process.stdout.write(`\rProgress: ${progress}%`);
-
-      if (processedFiles === totalFiles) {
-        console.log(`\n💾 Writing to CodeSummary.md...`);
-        const outputDir = path.join(__dirname, "ScriptOutput");
-        fs.mkdirSync(outputDir, { recursive: true });
-        fs.writeFileSync(path.join(outputDir, "CodeSummary.md"), summary);
-        console.log(`✅ Done! Summary saved to CodeSummary.md`);
-      }
     });
   });
+
+  const outputDir = path.join(__dirname, "ScriptOutput");
+  fs.mkdirSync(outputDir, { recursive: true });
+  const oldPath = path.join(outputDir, "CodeSummary.md");
+  const fixedPath = path.join(outputDir, "fixed.md");
+
+  // 🔥 Merge fixed.md snippets if enabled
+  if (config.useFixedSnippets) {
+    if (fs.existsSync(fixedPath)) {
+      console.log("\n📌 Merging fixed.md snippets...");
+      const fixedText = fs.readFileSync(fixedPath, "utf-8");
+      const fixedSnippets = parseSummary(fixedText);
+      for (const [file, code] of Object.entries(fixedSnippets)) {
+        if (!newSnippets[file]) {
+          newSnippets[file] = code; // only add missing ones
+        }
+      }
+    } else {
+      console.log("⚠️ fixed.md not found, skipping...");
+    }
+  }
+
+  // 🚀 NEW LOGIC: Compare with old output
+  if (config.checkOldOutput) {
+    let oldSnippets = {};
+    if (fs.existsSync(oldPath)) {
+      const oldText = fs.readFileSync(oldPath, "utf-8");
+      oldSnippets = parseSummary(oldText);
+    }
+
+    let unchangedSection = "# unchanged snippets\n\n";
+    let changedSection = "# changed snippets\n\n";
+
+    const allFiles = new Set([
+      ...Object.keys(oldSnippets),
+      ...Object.keys(newSnippets),
+    ]);
+
+    allFiles.forEach((file) => {
+      const oldCode = oldSnippets[file];
+      const newCode = newSnippets[file];
+      const ext = path.extname(file).toLowerCase();
+      const lang = supportedExtensions[ext] || "";
+
+      if (oldCode && newCode) {
+        if (oldCode === newCode) {
+          unchangedSection += `${file}:\n\`\`\`${lang}\n${newCode}\n\`\`\`\n\n`;
+        } else {
+          changedSection += `${file} (snippet changed):\n\`\`\`${lang}\n${newCode}\n\`\`\`\n\n`;
+        }
+      } else if (!oldCode && newCode) {
+        changedSection += `${file} (new file):\n\`\`\`${lang}\n${newCode}\n\`\`\`\n\n`;
+      } else if (oldCode && !newCode) {
+        changedSection += `${file} (removed file)\n\n`;
+      }
+    });
+
+    fs.writeFileSync(oldPath, unchangedSection + changedSection);
+  } else {
+    fs.writeFileSync(oldPath, summary);
+  }
+
+  console.log(`\n✅ Done! Summary saved to CodeSummary.md`);
 }
 
 // 🏁 MAIN
