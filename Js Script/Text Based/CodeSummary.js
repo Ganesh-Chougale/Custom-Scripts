@@ -4,9 +4,10 @@ const path = require("path");
 // ⚙️ Config object for switches
 const config = {
   reduceTokensByWhiteSpace: false,
-  checkOldOutput: true,    // 🔥 Compare with old summary
+  checkOldOutput: false,    // 🔥 Compare with old summary
   useFixedSnippets: true,  // 🔥 Use fixed.md as fallback
   skipLanguages: ["text"], // can be ".css" or "css" or mixed
+  removeComments: false     // ✅ new switch (true = strip comments, false = keep them)
 };
 
 // Supported file extensions and languages
@@ -201,7 +202,10 @@ function generateSummary(root, selectedDirs) {
 
       console.log(`Processing: ${relativeFilePath}`);
 
-      let cleanedContent = stripComments(content, lang);
+      let cleanedContent = content;
+      if (config.removeComments) {
+        cleanedContent = stripComments(content, lang);
+      }
       cleanedContent = removeExcessiveEmptyLines(cleanedContent);
 
       newSnippets[relativeFilePath] = cleanedContent;
