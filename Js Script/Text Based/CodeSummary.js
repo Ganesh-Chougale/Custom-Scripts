@@ -13,6 +13,7 @@ const config = {
 // Supported file extensions and languages
 const supportedExtensions = {
   ".js": "js",
+  ".gs": "gs",
   ".html": "html",
   ".ts": "typescript",
   ".java": "java",
