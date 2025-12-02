@@ -35,7 +35,10 @@ const supportedExtensions = {
   ".reg": "registry",
   ".bat": "batch",
   ".cmd": "batch",
-  ".md": "markdown"
+  ".md": "markdown",
+  ".xml": "xml",
+  ".svg": "svg",
+  ".storyboard": "storyboard"
 };
 
 // 🔑 Normalize skipLanguages so it can take both extensions (.css) or language names (css)
@@ -52,6 +55,11 @@ const ignoredFiles = [
   "cS.js", "CS.js", ".idea", ".next", "ErrorExporter.js", "Splitter.js", ".dart_tool", "io", "plugins", "flutter"
   , "CodeSummer.js", "FileAndFolderSummary.js"
 ];
+
+function isIgnored(relativeFilePath) {
+  const parts = relativeFilePath.split(path.sep);
+  return ignoredFiles.some((ignored) => parts.includes(ignored));
+}
 
 let processedFiles = 0;
 let totalFiles = 0;
@@ -70,11 +78,11 @@ function walkDir(dir, callback) {
 // ⚙️ Strip comments from code
 function stripComments(content, lang) {
   switch (lang) {
-    case "js": case "ts": case "java": case "c": case "cpp": case "csharp": case "php":
+    case "js": case "ts": case "java": case "c": case "cpp": case "csharp": case "php": case "dart":
       return content.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//gm, "");
     case "python": case "ruby": case "bash": case "shell": case "dockerfile":
       return content.replace(/#.*$/gm, "");
-    case "html": case "xml": case "vue": case "svelte":
+    case "html": case "xml": case "vue": case "svelte": case "svg": case "storyboard":
       return content.replace(/<!--[\s\S]*?-->/gm, "");
     case "css": case "scss": case "less":
       return content.replace(/\/\*[\s\S]*?\*\//gm, "");
@@ -131,7 +139,7 @@ function generateSummary(root, selectedDirs) {
       const relativeFilePath = path.relative(root, filePath);
       if (
         !lang ||
-        ignoredFiles.some((ignored) => relativeFilePath.includes(ignored)) ||
+        isIgnored(relativeFilePath) ||
         normalizedSkipLanguages.includes(lang)
       ) return;
       totalFiles++;
@@ -148,7 +156,7 @@ function generateSummary(root, selectedDirs) {
       const relativeFilePath = path.relative(root, filePath);
       if (
         !lang ||
-        ignoredFiles.some((ignored) => relativeFilePath.includes(ignored)) ||
+        isIgnored(relativeFilePath) ||
         normalizedSkipLanguages.includes(lang)
       ) return;
 
