@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const depthLevel = 3; // 👈 change to 'Infinity' if you want full depth
+const depthLevel = 4; // 👈 change to 'Infinity' if you want full depth
 
 const ignoredFolders = [
     '.angular', '.vscode', 'node_modules', 'Migrations', 'Debug',

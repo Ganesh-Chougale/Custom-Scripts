@@ -1,21 +1,15 @@
+#!/usr/bin/env node
 const fs = require("fs");
 const { spawnSync } = require("child_process");
 const path = require("path");
 
 // ✅ Switches
-const config = {
-  runCodeSummary: true,
-  runFolderStructurer: true,
-  runFixedText: true,
-  runTriedSolutions: true,
-  runFinalInstruction: true,
-};
+const config = require("./codex.config.js");
 
-// small helpers (no external PathMaker)
+// small helpers
 function scriptPath(...parts) {
   return path.join(__dirname, "Features", "Scripts", ...parts);
 }
-
 function scriptOutputPath(...parts) {
   return path.join(__dirname, "Features", "Scripts", "ScriptOutput", ...parts);
 }
@@ -31,31 +25,23 @@ function runFeature(scriptPathStr, args = []) {
   }
 }
 
-// ✅ Collect outputs (in requested order)
-function collectOutputs() {
-  const outputDir = path.join(__dirname, "Output");
-  fs.mkdirSync(outputDir, { recursive: true });
-  const outputPath = path.join(outputDir, "output.md");
-
+// ✅ Collect outputs to the DYNAMIC path
+function collectOutputs(targetOutputPath) {
+  const outputDir = path.dirname(targetOutputPath);
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+  
   let finalOutput = "# Codebase Report\n\n";
-
-  // 1️⃣ Folder Structure
+  
   if (config.runFolderStructurer) {
     const file = scriptOutputPath("FileAndFolderSummary.md");
-    if (fs.existsSync(file)) {
-      finalOutput += "## Folder Structure\n" + fs.readFileSync(file, "utf-8") + "\n\n---\n\n";
-    }
+    if (fs.existsSync(file)) finalOutput += "## Folder Structure\n" + fs.readFileSync(file, "utf-8") + "\n\n---\n\n";
   }
-
-  // 2️⃣ Fixed Text
   if (config.runFixedText) {
     const file = scriptOutputPath("FixedText.md");
-    if (fs.existsSync(file)) {
-      finalOutput += "## Fixed Text\n" + fs.readFileSync(file, "utf-8") + "\n\n---\n\n";
-    }
+    if (fs.existsSync(file)) finalOutput += "## Fixed Text\n" + fs.readFileSync(file, "utf-8") + "\n\n---\n\n";
   }
-
-  // 3️⃣ Code Summary
   if (config.runCodeSummary) {
     const file = scriptOutputPath("CodeSummary.md");
     if (fs.existsSync(file)) {
@@ -64,38 +50,45 @@ function collectOutputs() {
       finalOutput += "## Code Summary\n\n_(no code summary found)_\n\n---\n\n";
     }
   }
-
-  // 4️⃣ Tried Solutions (optional)
   if (config.runTriedSolutions) {
     const file = scriptOutputPath("TriedSolutions.md");
-    if (fs.existsSync(file)) {
-      finalOutput += "## Previous Takes\n" + fs.readFileSync(file, "utf-8") + "\n\n---\n\n";
-    }
+    if (fs.existsSync(file)) finalOutput += "## Previous Takes\n" + fs.readFileSync(file, "utf-8") + "\n\n---\n\n";
   }
-
-  fs.writeFileSync(outputPath, finalOutput, "utf-8");
-  console.log(`✅ Combined report generated at ${outputPath}`);
-  return outputPath;
+  
+  // Write to the user-defined path
+  fs.writeFileSync(targetOutputPath, finalOutput, "utf-8");
+  console.log(`✅ Combined report generated at ${targetOutputPath}`);
 }
 
 // 🏁 MAIN
 function main() {
   const args = process.argv.slice(2);
-  const projectPath = args[0] ? args[0] : process.cwd();
-  console.log(`📂 Running Codex on: ${projectPath}`);
+  
+  // 🔄 SWAPPED LOGIC: codex <output_file_path> <input_directory>
+  const outputPathArg = args[0];
+  const projectPathArg = args[1];
 
-  // run scripts (they accept projectPath where relevant)
+  // If no input directory is provided, default to current working directory
+  const projectPath = projectPathArg ? path.resolve(process.cwd(), projectPathArg) : process.cwd();
+  
+  // If no output file is provided, default to "output.md" inside the target project directory
+  const outputPath = outputPathArg ? path.resolve(process.cwd(), outputPathArg) : path.join(projectPath, "output.md");
+
+  console.log(`📂 Running Codex on: ${projectPath}`);
+  console.log(`📝 Output will be saved to: ${outputPath}`);
+
+  // Run scripts and pass the dynamic projectPath to ALL of them
   if (config.runFolderStructurer) runFeature(scriptPath("FileAndFolderSummary.js"), [projectPath]);
   if (config.runCodeSummary) runFeature(scriptPath("CodeSummary.js"), [projectPath]);
-  if (config.runFixedText) runFeature(scriptPath("FixedText.js"));
-  if (config.runTriedSolutions) runFeature(scriptPath("TriedSolutions.js"));
-
-  const outputPath = collectOutputs();
-
+  if (config.runFixedText) runFeature(scriptPath("FixedText.js"), [projectPath]);
+  if (config.runTriedSolutions) runFeature(scriptPath("TriedSolutions.js"), [projectPath]);
+  
+  collectOutputs(outputPath);
+  
   // Run final instruction after merging
   if (config.runFinalInstruction) {
-    runFeature(scriptPath("FinalInstruction.js"));
-    const instrFile = scriptOutputPath("FinalInstruction.md"); // ✅ corrected
+    runFeature(scriptPath("FinalInstruction.js"), [projectPath]);
+    const instrFile = scriptOutputPath("FinalInstruction.md");
     if (fs.existsSync(instrFile)) {
       const extra = fs.readFileSync(instrFile, "utf-8");
       const outputContent = fs.readFileSync(outputPath, "utf-8");
