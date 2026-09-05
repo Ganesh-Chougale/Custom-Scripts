@@ -16,30 +16,30 @@ const supportedExtensions = {
   ".html": "html",
   ".ts": "typescript",
   ".java": "java",
-  // ".py": "python",
+  ".py": "python",
   ".go": "go",
   ".rb": "ruby",
-  // ".cpp": "cpp",
+  ".cpp": "cpp",
   ".c": "c",
   ".php": "php",
-  // ".sh": "bash",
+  ".sh": "bash",
   ".cs": "csharp",
   ".css": "css",
   ".txt": "text",
-  // ".h": "cpp",
-  // ".yaml": "yaml",
+  ".h": "cpp",
+  ".yaml": "yaml",
   ".dart": "dart",
   ".tsx": "typescript",
   ".mjs": "javascript",
   ".env": "env",
   ".reg": "registry",
-  // ".bat": "batch",
+  ".bat": "batch",
   ".cmd": "batch",
   ".md": "markdown",
   ".json": "json",
-  // ".xml": "xml",
-  // ".svg": "svg",
-  // ".storyboard": "storyboard"
+  ".xml": "xml",
+  ".svg": "svg",
+  ".storyboard": "storyboard"
 };
 
 // 🔑 Normalize skipLanguages so it can take both extensions (.css) or language names (css)
@@ -49,6 +49,7 @@ const normalizedSkipLanguages = config.skipLanguages.map((item) =>
 
 // Ignored files and folders
 const ignoredFiles = [
+  "output", "Output", "1draft","1Draft",
   "site", ".metadata", "libraries", "gradle", ".angular", ".vscode", "node_modules", ".editorconfig",
   ".gitignore", "Migrations", "Debug", "test", "libs", "angular.json", "package-lock.json",
   "README.md", "Dependencies", "Connected Services", "tsconfig.app.json", "next-env.d.ts",
