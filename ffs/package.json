@@ -1,0 +1,17 @@
+{
+  "name": "ffs",
+  "version": "1.0.0",
+  "description": "Recursively inspect a folder and write its complete file/folder structure to Markdown.",
+  "type": "module",
+  "bin": {
+    "ffs": "./bin/ffs.js"
+  },
+  "scripts": {
+    "start": "node ./bin/ffs.js"
+  },
+  "keywords": ["folder", "file", "tree", "inspection", "cli"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
